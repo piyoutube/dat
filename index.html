@@ -1,7 +1,76 @@
-<body id=D onKeyDown=K=event.keyCode-38><script>Z=X=[B=A=12];function Y(){for(C
-=[q=c=i=4];f=i--*K;c-=!Z[h+(K+6?p+K:C[i]=p*A-(p/9|0)*145)])p=B[i];for(c?0:K+6?h
-+=K:t?B=C:0;k=i=K=q--;f+=Z[A+p])X[p=h+B[q]]=t+1;if(e=!e)if(h+=A,f|B)for(Z=X,X=[
-l=228],B=[[-7,-20,6,h=17,-9,3,3][t=++t%7]-4,0,1,t-6?-A:2];l--;)for(l%A?l-=l%A*!
-Z[l]:(P+=++k,c=l+=A);--c>A;)Z[c]=Z[c-A];for(S="<b>";i<240;S+=(c=X[i]|(X[i]=Z[i]
-|=++i%A<2|i>228))?"<b style=color:#"+142*c+">■":"＿")i%A?0:S+="<br>";
-D.innerHTML=S+P;Z[5]||setTimeout(Y,99-P)}Y(h=e=K=t=P=0)</script>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Camera Test</title>
+  <style>
+  canvas, video{
+    border: 1px solid gray;
+  }
+  </style>
+</head>
+<body>
+
+<h1>HTML5カメラ</h1>
+
+<video id="camera" width="300" height="200"></video>
+<canvas id="picture" width="300" height="200"></canvas>
+<form>
+  <button type="button" id="shutter">シャッター</button>
+</form>
+
+<audio id="se" preload="auto">
+  <source src="camera-shutter1.mp3" type="audio/mp3">
+</audio>
+
+<script>
+window.onload = () => {
+  const video  = document.querySelector("#camera");
+  const canvas = document.querySelector("#picture");
+  const se     = document.querySelector('#se');
+
+  /** カメラ設定 */
+  const constraints = {
+    audio: false,
+    video: {
+      width: 300,
+      height: 200,
+      facingMode: "user"   // フロントカメラを利用する
+      // facingMode: { exact: "environment" }  // リアカメラを利用する場合
+    }
+  };
+
+  /**
+   * カメラを<video>と同期
+   */
+  navigator.mediaDevices.getUserMedia(constraints)
+  .then( (stream) => {
+    video.srcObject = stream;
+    video.onloadedmetadata = (e) => {
+      video.play();
+    };
+  })
+  .catch( (err) => {
+    console.log(err.name + ": " + err.message);
+  });
+
+  /**
+   * シャッターボタン
+   */
+   document.querySelector("#shutter").addEventListener("click", () => {
+    const ctx = canvas.getContext("2d");
+
+    // 演出的な目的で一度映像を止めてSEを再生する
+    video.pause();  // 映像を停止
+    se.play();      // シャッター音
+    setTimeout( () => {
+      video.play();    // 0.5秒後にカメラ再開
+    }, 500);
+
+    // canvasに画像を貼り付ける
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  });
+};
+</script>
+</body>
+</html>
